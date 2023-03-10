@@ -9,9 +9,11 @@ import androiddeveloper.amrrabbie.kotlinapidb.utils.Network
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.amrrabbie.domain.entity.Article
 import com.amrrabbie.domain.entity.Post
 import com.amrrabbie.stctask.databinding.ActivityPostsListBinding
@@ -26,10 +28,12 @@ class PostsListActivity : AppCompatActivity() {
     lateinit var postsAdapter: PostsAdapter
     lateinit var postsAdapterOffline: PostsAdapterOffline
 
-    val viewmodel:PostsViewModel by viewModels()
+    //val viewmodel:PostsViewModel by viewModels()
 
+    val viewmodel:PostsViewModel by lazy {
+        ViewModelProvider(this)[PostsViewModel::class.java]
+    }
 
-    @OptIn(InternalCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -37,8 +41,8 @@ class PostsListActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         if(Network.isNetworkAvailable(this)) {
-            setupRecyclerView()
-            loadData()
+                setupRecyclerView()
+                loadData()
         }else{
             loadDataFromDb()
         }
@@ -52,15 +56,15 @@ class PostsListActivity : AppCompatActivity() {
 
         binding.postsrecycler.apply {
             adapter = postsAdapter
-            layoutManager = LinearLayoutManager(
-                this@PostsListActivity
+            layoutManager = StaggeredGridLayoutManager(
+                1, StaggeredGridLayoutManager.VERTICAL
             )
             setHasFixedSize(true)
         }
 
     }
 
-    @InternalCoroutinesApi
+
     private fun loadData() {
 
         postsAdapter.addLoadStateListener { loadState ->
@@ -87,7 +91,7 @@ class PostsListActivity : AppCompatActivity() {
         }
 
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenStarted {
 
             viewmodel.postslist.collect {
                 it?.let {
@@ -96,10 +100,14 @@ class PostsListActivity : AppCompatActivity() {
 
                     Log.d("aaa", "load: ${it.toString()}")
                     postsAdapter.submitData(it)
-                    postsAdapter.notifyDataSetChanged()
 
                     val list = postsAdapter.snapshot().items
-                    insertPosts(list)
+                    Log.d("TAG", "loadData: ${list.toString()}")
+                    list?.let {
+                        insertPosts(list)
+                    }
+
+
                 }
 
             }
