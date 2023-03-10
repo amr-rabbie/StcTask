@@ -94,7 +94,6 @@ class PostsListActivity : AppCompatActivity() {
         lifecycleScope.launchWhenStarted {
 
             viewmodel.postslist.collect {
-                it?.let {
 
                     deletePosts()
 
@@ -103,13 +102,7 @@ class PostsListActivity : AppCompatActivity() {
 
                     val list = postsAdapter.snapshot().items
                     Log.d("TAG", "loadData: ${list.toString()}")
-                    list?.let {
-                        insertPosts(list)
-                    }
-
-
-                }
-
+                    insertPosts(list)
             }
 
         }
