@@ -34,6 +34,7 @@ class PostsListActivity : AppCompatActivity() {
         ViewModelProvider(this)[PostsViewModel::class.java]
     }
 
+    @OptIn(InternalCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -64,7 +65,7 @@ class PostsListActivity : AppCompatActivity() {
 
     }
 
-
+    @InternalCoroutinesApi
     private fun loadData() {
 
         postsAdapter.addLoadStateListener { loadState ->
